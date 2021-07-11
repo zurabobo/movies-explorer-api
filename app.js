@@ -27,7 +27,7 @@ const options = {
   credentials: true,
 };
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3003 } = process.env;
 
 mongoose.connect(MONGO_URL, {
   useUnifiedTopology: true,
