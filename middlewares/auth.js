@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const NotAuthError = require('../../react-mesto-api-full/backend/errors/not-auth-err');
+const NotAuthError = require('../errors/not-auth-err');
 const { NOT_AUTH_ERROR } = require('../utils/constants');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
