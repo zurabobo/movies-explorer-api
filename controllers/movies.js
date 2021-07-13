@@ -7,6 +7,7 @@ const {
   BAD_REQUEST_ERROR,
   NOT_FOUND_MOVIE_ERROR_MESSAGE,
   FORBIDDEN_DELETE_MOVIE_MESSAGE,
+  CONFLICT_ERROR,
 } = require('../utils/constants');
 
 module.exports.getMovies = (req, res, next) => {
@@ -25,30 +26,24 @@ module.exports.createMovie = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadReqError(BAD_REQUEST_ERROR);
+        next(new BadReqError(BAD_REQUEST_ERROR));
+      } else if (err.name === 'MongoError' || err.code === 11000) {
+        next(new ConflictError(CONFLICT_ERROR));
       }
-      if (err.name === 'MongoError' || err.code === 11000) {
-        throw new ConflictError(err.message);
-      }
-    })
-    .catch(next);
+      next(err);
+    });
 };
 
 module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(req.params.movieId)
-    .orFail(new Error('NotFound'))
-    .catch((err) => {
-      if (err.message === 'NotFound') {
-        throw new NotFoundError(NOT_FOUND_MOVIE_ERROR_MESSAGE);
-      }
-    })
+    .orFail(() => new NotFoundError(NOT_FOUND_MOVIE_ERROR_MESSAGE))
     .then((movie) => {
       if (movie.owner.toString() !== req.user._id) {
         throw new ForbiddenError(FORBIDDEN_DELETE_MOVIE_MESSAGE);
       } else {
-        Movie.findByIdAndDelete(req.params.movieId)
-          .then((deleteMovie) => {
-            res.status(200).send(deleteMovie);
+        return movie.remove()
+          .then(() => {
+            res.status(200).send(movie);
           });
       }
     })

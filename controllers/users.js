@@ -9,6 +9,7 @@ const {
   BAD_REQUEST_ERROR,
   CONFLICT_ERROR,
   NOT_FOUND_USER_MESSAGE,
+  NOT_AUTH_ERROR_EMAIL_PASSWORD,
 } = require('../utils/constants');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -30,32 +31,25 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadReqError(BAD_REQUEST_ERROR);
+        next(new BadReqError(BAD_REQUEST_ERROR));
+      } else if (err.name === 'MongoError' || err.code === 11000) {
+        next(new ConflictError(CONFLICT_ERROR));
       }
-      if (err.name === 'MongoError' || err.code === 11000) {
-        throw new ConflictError(CONFLICT_ERROR);
-      }
-    })
-    .catch(next);
+      next(err);
+    });
 };
 
 module.exports.getUser = (req, res, next) => {
-  const userId = req.urer._id;
+  const userId = req.user._id;
 
   User.findById(userId)
-    .orFail(new Error('NotValidId'))
+    .orFail(() => new NotFoundError(NOT_FOUND_USER_MESSAGE))
     .then((user) => {
-      res.status(200).send(user);
+      res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadReqError(BAD_REQUEST_ERROR);
-      }
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError(NOT_FOUND_USER_MESSAGE);
-      }
-    })
-    .catch(next);
+      next(err);
+    });
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -72,10 +66,11 @@ module.exports.updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadReqError(BAD_REQUEST_ERROR);
+        next(new BadReqError(BAD_REQUEST_ERROR));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -91,8 +86,7 @@ module.exports.login = (req, res, next) => {
 
       res.send({ token });
     })
-    .catch((err) => {
-      throw new NotAuthError(err.message);
-    })
-    .catch(next);
+    .catch(() => {
+      next(new NotAuthError(NOT_AUTH_ERROR_EMAIL_PASSWORD));
+    });
 };

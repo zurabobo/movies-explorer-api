@@ -17,8 +17,8 @@ const app = express();
 const options = {
   origin: [
     'http://localhost:8080',
-    'https://movies-explorer.zb.nomoredomains.rocks',
-    'https://api.movies-explorer.zb.nomoredomains.rocks',
+    // 'https://movies-explorer.zb.nomoredomains.rocks',
+    // 'https://api.movies-explorer.zb.nomoredomains.rocks',
   ],
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
   preflightContinue: false,
