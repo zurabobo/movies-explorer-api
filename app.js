@@ -14,20 +14,32 @@ const limiter = require('./middlewares/limiter');
 
 const app = express();
 
-const options = {
-  origin: [
-    'http://localhost:8080',
-    // 'https://movies-explorer.zb.nomoredomains.rocks',
-    // 'https://api.movies-explorer.zb.nomoredomains.rocks',
-  ],
-  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
-  allowedHeaders: ['Content-Type', 'origin', 'Authorization'],
-  credentials: true,
-};
+// const options = {
+//   origin: [
+//     // 'http://localhost:8080',
+//     // 'https://movies-explorer.zb.nomoredomains.rocks',
+//     // 'https://api.movies-explorer.zb.nomoredomains.rocks',
 
-const { PORT = 3003 } = process.env;
+//     'http://localhost:3000',
+//     'http://localhost:3001',
+//     'http://localhost:3002',
+//     'http://localhost:3003',
+//     'http://localhost:3004',
+//     'http://localhost:3005',
+//   ],
+//   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204,
+//   allowedHeaders: ['Content-Type', 'origin', 'Authorization'],
+//   credentials: true,
+// };
+const allowedCors = [
+  'http://localhost:8080',
+  'https://movies-explorer.zb.nomoredomains.rocks',
+  'https://api.movies-explorer.zb.nomoredomains.rocks',
+];
+
+const { PORT = 3000 } = process.env;
 
 mongoose.connect(MONGO_URL, {
   useUnifiedTopology: true,
@@ -35,6 +47,23 @@ mongoose.connect(MONGO_URL, {
   useCreateIndex: true,
   useFindAndModify: false,
 });
+
+app.use((req, res, next) => {
+  const { method } = req;
+  const { origin } = req.headers;
+  const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+  const requestHeaders = req.headers['access-control-request-headers'];
+
+  if (allowedCors.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  if (method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
+    res.header('Access-Control-Allow-Headers', requestHeaders);
+  }
+  next();
+});
+
 app.use(requestLogger);
 app.use(limiter);
 
@@ -44,7 +73,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use('*', cors(options));
+app.use(cors());
 
 app.use(routes);
 
