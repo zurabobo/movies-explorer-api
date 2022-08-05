@@ -17,7 +17,7 @@ const app = express();
 const options = {
   origin: [
     'http://localhost:8080',
-    'https://moviesexplorer-api.herokuapp.com/'
+    'https://moviesexplorer-api.herokuapp.com'
     // 'https://movies-explorer.zb.nomoredomains.rocks',
     // 'https://api.movies-explorer.zb.nomoredomains.rocks',
   ],
@@ -31,10 +31,9 @@ const options = {
 const { PORT = 3003 } = process.env;
 
 mongoose.connect(process.env.DB_URL, {
-  useUnifiedTopology: true,
   useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
 });
 app.use(requestLogger);
 app.use(limiter);
