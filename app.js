@@ -17,6 +17,7 @@ const app = express();
 const options = {
   origin: [
     'http://localhost:8080',
+    'https://moviesexplorer-api.herokuapp.com'
     // 'https://movies-explorer.zb.nomoredomains.rocks',
     // 'https://api.movies-explorer.zb.nomoredomains.rocks',
   ],
