@@ -30,7 +30,7 @@ const options = {
 
 const { PORT = 3003 } = process.env;
 
-mongoose.connect(MONGO_URL || process.env.DB_URL, {
+mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
