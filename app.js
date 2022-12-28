@@ -17,6 +17,7 @@ const app = express();
 const options = {
   origin: [
     'http://localhost:8080',
+    'http://localhost:3000',
     'https://movies-explorer-api-yv7u.onrender.com',
     'https://movies-explorer-frontend.netlify.app'
     // 'https://movies-explorer.zb.nomoredomains.rocks',
